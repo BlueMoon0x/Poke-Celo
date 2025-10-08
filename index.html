@@ -1,1 +1,116 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>Tap to GM — Web3 Edition</title>
+  <meta name="description" content="Tap to GM — intégration Web3 avec transaction symbolique" />
+  <script src="https://cdn.jsdelivr.net/npm/web3@latest/dist/web3.min.js"></script>
+  <script src="https://unpkg.com/@walletconnect/web3-provider@1.7.8/dist/umd/index.min.js"></script>
+  <style>
+    :root{
+      --bg1: #fef3c7;
+      --bg2: #fde68a;
+      --accent: #7c5cff;
+      --accent-2: #00e0b8;
+      --muted: rgba(0,0,0,0.7);
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial;
+    }
+    html,body{height:100%;margin:0}
+    body{background:linear-gradient(180deg,var(--bg1),var(--bg2));color:#111;display:flex;align-items:center;justify-content:center;padding:48px;}
+    .container{width:100%;max-width:980px;display:grid;grid-template-columns:1fr 380px;gap:28px;align-items:center;}
+    .left,.right{padding:32px;background:rgba(255,255,255,0.5);border-radius:16px;backdrop-filter:blur(8px);box-shadow:0 10px 30px rgba(0,0,0,0.15);}
+    .logo{width:56px;height:56px;border-radius:12px;background:linear-gradient(135deg,var(--accent),var(--accent-2));display:flex;align-items:center;justify-content:center;font-weight:700;color:white;}
+    .headline{font-size:42px;margin:18px 0 8px;color:#111}
+    .btn{background:linear-gradient(90deg,var(--accent),var(--accent-2));padding:12px 18px;border-radius:12px;border:0;color:white;font-weight:700;cursor:pointer;}
+    .btn.ghost{background:transparent;border:1px solid rgba(0,0,0,0.15);color:#111;font-weight:600}
+    .big-gm{width:160px;height:160px;border-radius:80px;display:flex;align-items:center;justify-content:center;font-size:36px;font-weight:800;cursor:pointer;background:linear-gradient(135deg,var(--accent),var(--accent-2));color:white;box-shadow:0 12px 30px rgba(0,0,0,0.3);transition:transform .12s ease;}
+    .big-gm:active{transform:scale(.96)}
+  </style>
+</head>
+<body>
+  <main class="container">
+    <section class="left">
+      <div class="brand">
+        <div class="logo">GM</div>
+        <div>
+          <h1>Tap to GM</h1>
+          <p>Web3 GM — avec transaction symbolique</p>
+        </div>
+      </div>
+      <h2 class="headline">Connecte ton wallet et envoie ton GM onchain ✨</h2>
+      <button class="btn" id="tapBtn">Tap to GM</button>
+      <p id="txStatus" style="margin-top:10px;color:var(--muted);"></p>
+    </section>
 
+    <aside class="right">
+      <div class="tap-card" style="text-align:center;">
+        <div class="big-gm" id="bigGM">gm</div>
+        <div class="wallet" id="walletStatus">Non connecté</div>
+        <button class="btn ghost" id="connectBtn">Connect Wallet</button>
+      </div>
+    </aside>
+  </main>
+
+  <script>
+    let web3;
+    let accounts;
+
+    const connectBtn = document.getElementById('connectBtn');
+    const walletStatus = document.getElementById('walletStatus');
+    const tapBtn = document.getElementById('tapBtn');
+    const txStatus = document.getElementById('txStatus');
+
+    async function connectWallet() {
+      if (window.ethereum) {
+        try {
+          accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+          web3 = new Web3(window.ethereum);
+          walletStatus.textContent = `Connecté: ${accounts[0].slice(0,6)}...${accounts[0].slice(-4)}`;
+          connectBtn.textContent = 'Disconnect';
+        } catch (err) {
+          alert('Connexion refusée.');
+        }
+      } else {
+        const provider = new WalletConnectProvider.default({ infuraId: 'e1b7e9da3dc64a49a5891f9a6d4b9ef4' });
+        await provider.enable();
+        web3 = new Web3(provider);
+        const accs = await web3.eth.getAccounts();
+        accounts = accs;
+        walletStatus.textContent = `Connecté via WC: ${accs[0].slice(0,6)}...${accs[0].slice(-4)}`;
+        connectBtn.textContent = 'Disconnect';
+      }
+    }
+
+    connectBtn.addEventListener('click', async ()=>{
+      if (connectBtn.textContent === 'Disconnect') {
+        walletStatus.textContent = 'Non connecté';
+        connectBtn.textContent = 'Connect Wallet';
+        accounts = null;
+        return;
+      }
+      await connectWallet();
+    });
+
+    // Transaction symbolique — envoie une tx nulle à soi-même (ou un message data)
+    tapBtn.addEventListener('click', async ()=>{
+      if (!accounts || !web3) {
+        alert('Connecte d’abord ton wallet !');
+        return;
+      }
+      try {
+        txStatus.textContent = 'Envoi du GM en cours...';
+        const tx = await web3.eth.sendTransaction({
+          from: accounts[0],
+          to: accounts[0],
+          value: '0x0',
+          data: web3.utils.toHex('GM from Tap-to-GM App')
+        });
+        txStatus.textContent = `GM envoyé ✅ Tx hash: ${tx.transactionHash.slice(0,12)}...`;
+      } catch (err) {
+        txStatus.textContent = 'Transaction annulée ou erreur.';
+      }
+    });
+  </script>
+</body>
+</html>
