@@ -12,7 +12,7 @@
     p{margin:6px 0 18px;color:rgba(230,238,248,0.8)}
     .arena{display:flex;gap:40px;justify-content:center;padding:18px}
     .pokeball{width:140px;height:140px;border-radius:50%;position:relative;cursor:pointer;transform-origin:center center;transition:transform .18s ease, box-shadow .18s}
-    .pokeball .top{position:absolute;left:0;right:0;top:0;height:50%;border-top-left-radius:999px;border-top-right-radius:999px;background:linear-gradient(180deg,#ff4d4d,#d11d2f);overflow:hidden}
+    .pokeball .top{position:absolute;left:0;right:0;top:0;height:50%;border-top-left-radius:999px;border-top-right-radius:999px;background:linear-gradient(180deg,#ffeb3b,#fdd835);overflow:hidden}
     .pokeball .bot{position:absolute;left:0;right:0;bottom:0;height:50%;border-bottom-left-radius:999px;border-bottom-right-radius:999px;background:linear-gradient(180deg,#fff,#f2f5f9)}
     .pokeball .mid{position:absolute;left:0;right:0;top:50%;height:6px;margin-top:-3px;background:#111;border-radius:6px}
     .pokeball .button{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);width:44px;height:44px;border-radius:50%;background:#eee;border:6px solid #111;display:flex;align-items:center;justify-content:center;font-weight:700;color:#111}
@@ -34,8 +34,8 @@
 </head>
 <body>
   <div class="container">
-    <h1>CELO PokéGame — x3</h1>
-    <p>Déposez <strong>1 CELO</strong> et trouvez la bonne pokéball. Si vous gagnez : <strong>x3</strong> (3 CELO). Intégré avec WalletConnect/Valora et Smart Contract.</p>
+    <h1>CELO PokéGame</h1>
+    <p>Trouvez la bonne Pokeball.</p>
 
     <div class="arena" id="arena">
       <div class="pokeball animated" data-index="0"><div class="top"></div><div class="bot"></div><div class="mid"></div><div class="button">GO</div><div class="shine"></div></div>
@@ -107,12 +107,10 @@
         const user = accounts[0];
         status.textContent = `Wallet connecté: ${user.substring(0,6)}...${user.slice(-4)}`;
 
-        // Appel smart contract pour jouer
         const selected = pokes.find(p=>p.dataset._selected==='true');
         const idx = Number(selected.dataset.index);
         status.textContent='Transaction en cours...';
 
-        // Note : backend doit fournir isWinner de façon sécurisée
         const response = await fetch(`/reveal?player=${user}&round=1&choice=${idx}`);
         const data = await response.json(); // {won:true/false}
 
