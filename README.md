@@ -1,4 +1,4 @@
-# 🎡 SpinMissions — CELO Daily Spin + Missions dApp
+# 🎡 SpinMissions — CELO Daily Spin + Missions
 
 ![Build](https://github.com/<your-username>/spin-missions/actions/workflows/deploy.yml/badge.svg)
 ![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)
